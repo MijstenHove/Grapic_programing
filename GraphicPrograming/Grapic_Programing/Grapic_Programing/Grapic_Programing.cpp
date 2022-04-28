@@ -34,10 +34,10 @@ int main()
     //Triangle
     float vertices[] = {
     //pos                    // col
-     -0.5f, -0.5f, 0.5f,     1.0f, 0.0f, 0.0f, 1.0f, //r        lbo
-     0.5f, -0.5f, 0.5f,      0.0f, 1.0f, 0.0f, 1.0f, //g        rbo
-    -0.5f,  0.5f, 0.5f,      0.0f, 0.0f, 1.0f, 1.0f, //b        lon
-     0.5f,  0.5f, 0.5f,      1.0f, 0.0f, 1.0f, 1.0f, //magenta  ron
+     -0.5f, -0.5f, 0.5f,     1.0f, 0.0f, 0.0f, 1.0f,    0.0f, 0.0f,         
+     0.5f, -0.5f, 0.5f,      0.0f, 1.0f, 0.0f, 1.0f,    1.0f, 0.0f,             
+    -0.5f,  0.5f, 0.5f,      0.0f, 0.0f, 1.0f, 1.0f,    0.0f, 1.0f,           
+     0.5f,  0.5f, 0.5f,      1.0f, 0.0f, 1.0f, 1.0f,    1.0f, 1.0f,          
 
 
  
@@ -64,9 +64,9 @@ int main()
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
 
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 7, 0);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 9, 0);
     glEnableVertexAttribArray(0);
-    glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, sizeof(float) * 7, (void*)(sizeof(float) * 3));
+    glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, sizeof(float) * 9, (void*)(sizeof(float) * 3));
     glEnableVertexAttribArray(1);
 
     glBindBuffer(GL_ARRAY_BUFFER, 0);
@@ -79,11 +79,11 @@ int main()
     const char* vertexSource = "#version 330 core\n"
         "layout(location =0) in vec3 vPos;\n"
         "layout(location=1) in vec4 vColor;\n"
-        "layout(location=2) in vec4 UVpos;\n"
+        "layout(location =3) in vec3 UVPos;\n"
         "out vec4 color;\n"
         "void main() {\n"
         "\tgl_Position = vec4(vPos, 1.0f);\n"
-        "\tgl_Position = vec4(UVPos);\n"
+
         "\tcolor = vColor; \n"
         "}\n"
         "\0";
@@ -91,11 +91,9 @@ int main()
     const char* fragmentSource = 
         "#version 330 core\n"
         "out vec4 FragColor;\n"
-  
         "in vec4 color;\n"
         "void main() {\n"
         "\tFragColor = vec4(color.rgb,1.0f);\n"
-     
         "}\n"
         "\0";
 
