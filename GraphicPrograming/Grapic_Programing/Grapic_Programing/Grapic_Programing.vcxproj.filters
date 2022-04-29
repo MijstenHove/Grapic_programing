@@ -22,4 +22,17 @@
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
+  <ItemGroup>
+    <None Include="VerShader.shader">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="fragShader.shader">
+      <Filter>Resource Files</Filter>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="..\..\..\..\..\..\Downloads\B_stone.tif">
+      <Filter>Source Files</Filter>
+    </Image>
+  </ItemGroup>
 </Project>

@@ -145,6 +145,13 @@
     <ClCompile Include="glad.c" />
     <ClCompile Include="Grapic_Programing.cpp" />
   </ItemGroup>
+  <ItemGroup>
+    <None Include="fragShader.shader" />
+    <None Include="VerShader.shader" />
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="..\..\..\..\..\..\Downloads\B_stone.tif" />
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>

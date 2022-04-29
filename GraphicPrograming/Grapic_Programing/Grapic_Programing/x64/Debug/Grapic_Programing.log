@@ -1,2 +1,3 @@
 ﻿  Grapic_Programing.cpp
+C:\Users\mijst\Documents\Git\Grapic_programing\GraphicPrograming\Grapic_Programing\Grapic_Programing\Grapic_Programing.cpp(56,15): warning C4244: 'initializing': conversion from 'std::streamoff' to 'int', possible loss of data
   Grapic_Programing.vcxproj -> C:\Users\mijst\Documents\Git\Grapic_programing\GraphicPrograming\Grapic_Programing\x64\Debug\Grapic_Programing.exe

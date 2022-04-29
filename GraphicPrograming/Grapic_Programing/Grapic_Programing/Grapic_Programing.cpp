@@ -6,6 +6,64 @@
 #include <string>
 #include "GLFW/glfw3.h"
 
+
+#include <fstream>
+
+#define STB_IMAGE_IMPLEMENTATION
+#include "stb_image.h"
+
+unsigned int loadTexture(std:: string tif)
+{
+    //gen & bind id
+    unsigned int textureID;
+    glGenTextures(1, &textureID);
+    glBindTexture(GL_TEXTURE_2D, textureID);
+
+    // instellen texter params
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+
+
+
+    // shit inlaaden
+    int width, height, channels;
+    unsigned char* data;
+    data = stbi_load("B_stone.tif", &width, &height, &channels, 0);
+    if (data == nullptr)
+    {
+        std::cout << "error" << " imgae" << std::endl;
+
+    }
+    else
+    {
+        glTexSubImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB,GL_UNSIGNED_BYTE, data);
+        glGenerateMipmap(GL_TEXTURE_2D);
+    }
+
+    stbi_image_free(data);
+
+    glBindTexture(GL_TEXTURE_2D,0);
+
+    return textureID;
+
+}
+
+
+void loadFromFile(const char* url, char** target) {
+    std::ifstream stream(url, std::ios::binary);
+
+    stream.seekg(0, stream.end);
+    int total = stream.tellg();
+    *target = new char[total + 1];
+
+    stream.seekg(0, stream.beg);
+    stream.read(*target, total);
+
+    (*target)[total] = '\0';
+
+    stream.close();
+}
+
 int main()
 {
     std::cout << "Hello World!\n";
@@ -33,20 +91,61 @@ int main()
     float v = float(sin(t * 1.0f));
     //Triangle
     float vertices[] = {
-    //pos                    // col
-     -0.5f, -0.5f, 0.5f,     1.0f, 0.0f, 0.0f, 1.0f,    0.0f, 0.0f,         
-     0.5f, -0.5f, 0.5f,      0.0f, 1.0f, 0.0f, 1.0f,    1.0f, 0.0f,             
-    -0.5f,  0.5f, 0.5f,      0.0f, 0.0f, 1.0f, 1.0f,    0.0f, 1.0f,           
-     0.5f,  0.5f, 0.5f,      1.0f, 0.0f, 1.0f, 1.0f,    1.0f, 1.0f,          
+        // positions            //colors            // tex coords   // normals
+        0.5f, -0.5f, -0.5f,     1.0f, 1.0f, 1.0f,   1.f, 0.f,       0.f, -1.f, 0.f,
+        0.5f, -0.5f, 0.5f,      1.0f, 1.0f, 1.0f,   1.f, 1.f,       0.f, -1.f, 0.f,
+        -0.5f, -0.5f, 0.5f,     1.0f, 1.0f, 1.0f,   0.f, 1.f,       0.f, -1.f, 0.f,
+        -0.5f, -0.5f, -.5f,     1.0f, 1.0f, 1.0f,   0.f, 0.f,       0.f, -1.f, 0.f,
 
+        0.5f, 0.5f, -0.5f,      1.0f, 1.0f, 1.0f,   2.f, 0.f,       1.f, 0.f, 0.f,
+        0.5f, 0.5f, 0.5f,       1.0f, 1.0f, 1.0f,   2.f, 1.f,       1.f, 0.f, 0.f,
 
- 
+        0.5f, 0.5f, 0.5f,       1.0f, 1.0f, 1.0f,   1.f, 2.f,       0.f, 0.f, 1.f,
+        -0.5f, 0.5f, 0.5f,      1.0f, 1.0f, 1.0f,   0.f, 2.f,       0.f, 0.f, 1.f,
+
+        -0.5f, 0.5f, 0.5f,      1.0f, 1.0f, 1.0f,   -1.f, 1.f,      -1.f, 0.f, 0.f,
+        -0.5f, 0.5f, -.5f,      1.0f, 1.0f, 1.0f,   -1.f, 0.f,      -1.f, 0.f, 0.f,
+
+        -0.5f, 0.5f, -.5f,      1.0f, 1.0f, 1.0f,   0.f, -1.f,      0.f, 0.f, -1.f,
+        0.5f, 0.5f, -0.5f,      1.0f, 1.0f, 1.0f,   1.f, -1.f,      0.f, 0.f, -1.f,
+
+        -0.5f, 0.5f, -.5f,      1.0f, 1.0f, 1.0f,   3.f, 0.f,       0.f, 1.f, 0.f,
+        -0.5f, 0.5f, 0.5f,      1.0f, 1.0f, 1.0f,   3.f, 1.f,       0.f, 1.f, 0.f,
+
+        0.5f, -0.5f, 0.5f,      1.0f, 1.0f, 1.0f,   1.f, 1.f,       0.f, 0.f, 1.f,
+        -0.5f, -0.5f, 0.5f,     1.0f, 1.0f, 1.0f,   0.f, 1.f,       0.f, 0.f, 1.f,
+
+        -0.5f, -0.5f, 0.5f,     1.0f, 1.0f, 1.0f,   0.f, 1.f,       -1.f, 0.f, 0.f,
+        -0.5f, -0.5f, -.5f,     1.0f, 1.0f, 1.0f,   0.f, 0.f,       -1.f, 0.f, 0.f,
+
+        -0.5f, -0.5f, -.5f,     1.0f, 1.0f, 1.0f,   0.f, 0.f,       0.f, 0.f, -1.f,
+        0.5f, -0.5f, -0.5f,     1.0f, 1.0f, 1.0f,   1.f, 0.f,       0.f, 0.f, -1.f,
+
+        0.5f, -0.5f, -0.5f,     1.0f, 1.0f, 1.0f,   1.f, 0.f,       1.f, 0.f, 0.f,
+        0.5f, -0.5f, 0.5f,      1.0f, 1.0f, 1.0f,   1.f, 1.f,       1.f, 0.f, 0.f,
+
+        0.5f, 0.5f, -0.5f,      1.0f, 1.0f, 1.0f,   2.f, 0.f,       0.f, 1.f, 0.f,
+        0.5f, 0.5f, 0.5f,       1.0f, 1.0f, 1.0f,   2.f, 1.f,       0.f, 1.f, 0.f
     };
 
     int indices[]{
-        0, 1, 2,
-        1, 3, 2,
-
+    0, 1, 2,   // first triangle
+    0, 2, 3,    // second triangle
+    // BACK
+    14, 6, 7,   // first triangle
+    14, 7, 15,    // second triangle
+    // RIGHT
+    20, 4, 5,   // first triangle
+    20, 5, 21,    // second triangle
+    // LEFT
+    16, 8, 9,   // first triangle
+    16, 9, 17,    // second triangle
+    // FRONT
+    18, 10, 11,   // first triangle
+    18, 11, 19,    // second triangle
+    // UP
+    22, 12, 13,   // first triangle
+    22, 13, 23,    // second triangle
     };
 
 
@@ -64,10 +163,22 @@ int main()
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
 
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 9, 0);
+    int stride = sizeof(float) * 11;
+
+    //pos
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, stride , 0);
     glEnableVertexAttribArray(0);
-    glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, sizeof(float) * 9, (void*)(sizeof(float) * 3));
+  //col
+    glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, stride , (void*)(sizeof(float) * 3));
     glEnableVertexAttribArray(1);
+   
+    // UV
+    glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, stride, (void*)( sizeof(float) * 6));
+    glEnableVertexAttribArray(2);
+
+    // normal
+    glVertexAttribPointer(3, 3, GL_FLOAT, GL_FALSE,stride, (void*)(sizeof(float) * 8));
+    glEnableVertexAttribArray(2);
 
     glBindBuffer(GL_ARRAY_BUFFER, 0);
     glBindVertexArray(0);
@@ -75,28 +186,16 @@ int main()
 
 
     //    SETUP SHADER PROGRAM
+     char* vertexSource;
+    loadFromFile("VerShader.shader", &vertexSource);
 
-    const char* vertexSource = "#version 330 core\n"
-        "layout(location =0) in vec3 vPos;\n"
-        "layout(location=1) in vec4 vColor;\n"
-        "layout(location =3) in vec3 UVPos;\n"
-        "out vec4 color;\n"
-        "void main() {\n"
-        "\tgl_Position = vec4(vPos, 1.0f);\n"
+    char* fragmentSource;
+    loadFromFile("fragShader.shader", &fragmentSource);
 
-        "\tcolor = vColor; \n"
-        "}\n"
-        "\0";
+    //load
 
-    const char* fragmentSource = 
-        "#version 330 core\n"
-        "out vec4 FragColor;\n"
-        "in vec4 color;\n"
-        "void main() {\n"
-        "\tFragColor = vec4(color.rgb,1.0f);\n"
-        "}\n"
-        "\0";
-
+    unsigned int diffureTexID = loadTexture("B_stone.tif");
+    
     unsigned int vertID, fragID;
     vertID = glCreateShader(GL_VERTEX_SHADER);
     fragID = glCreateShader(GL_FRAGMENT_SHADER);
@@ -145,3 +244,4 @@ int main()
     glfwTerminate(); //afsluiten
     return 0;
 }
+
