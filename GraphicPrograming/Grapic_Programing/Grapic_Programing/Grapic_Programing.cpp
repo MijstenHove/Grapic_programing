@@ -12,7 +12,7 @@
 #define STB_IMAGE_IMPLEMENTATION
 #include "stb_image.h"
 
-unsigned int loadTexture(std:: string tif)
+unsigned int loadTexture(std:: string url)
 {
     //gen & bind id
     unsigned int textureID;
@@ -28,7 +28,7 @@ unsigned int loadTexture(std:: string tif)
     // shit inlaaden
     int width, height, channels;
     unsigned char* data;
-    data = stbi_load("B_stone.tif", &width, &height, &channels, 0);
+    data = stbi_load(url.c_str(), &width, &height, &channels, 0);
     if (data == nullptr)
     {
         std::cout << "error" << " imgae" << std::endl;
@@ -194,7 +194,7 @@ int main()
 
     //load
 
-    unsigned int diffureTexID = loadTexture("B_stone.tif");
+    unsigned int diffureTexID = loadTexture("char.JPG");
     
     unsigned int vertID, fragID;
     vertID = glCreateShader(GL_VERTEX_SHADER);
@@ -205,6 +205,25 @@ int main()
 
     glCompileShader(vertID);
     glCompileShader(fragID);
+//error
+    int success;
+    char infoLog[512];
+
+    glCompileShader(vertID);
+    glGetShaderiv(vertID, GL_COMPILE_STATUS, &success);
+    if (!success)
+    {
+        glGetShaderInfoLog(vertID, 512, NULL, infoLog);
+        std::cout << "ERROR::SHADER::VERTEX::COMPILATION_FAILED\n" << infoLog << std::endl;
+    };
+
+    glCompileShader(fragID);
+    glGetShaderiv(fragID, GL_COMPILE_STATUS, &success);
+    if (!success)
+    {
+        glGetShaderInfoLog(fragID, 512, NULL, infoLog);
+        std::cout << "ERROR::SHADER::VERTEX::COMPILATION_FAILED\n" << infoLog << std::endl;
+    };
 
     unsigned int myProgram = glCreateProgram();
     glAttachShader(myProgram, vertID);
@@ -232,6 +251,9 @@ int main()
         glClearColor(r, g, b, a);
         glfwSwapBuffers(window);
         glClear(GL_COLOR_BUFFER_BIT);
+
+        glActiveTexture(GL_TEXTURE0);
+        glBindTexture(GL_TEXTURE_2D, diffureTexID);
 
         glBindVertexArray(VAO);
         //glDrawArrays(GL_TRIANGLES, 0, 6);
