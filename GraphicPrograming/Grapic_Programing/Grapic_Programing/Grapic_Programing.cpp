@@ -6,7 +6,6 @@
 #include <string>
 #include "GLFW/glfw3.h"
 
-
 #include <fstream>
 
 #define STB_IMAGE_IMPLEMENTATION
@@ -23,16 +22,13 @@ unsigned int loadTexture(std:: string url)
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
 
-
-
-    // shit inlaaden
+    // shit inladen
     int width, height, channels;
     unsigned char* data;
     data = stbi_load(url.c_str(), &width, &height, &channels, 0);
     if (data == nullptr)
     {
         std::cout << "error" << " imgae" << std::endl;
-
     }
     else
     {
@@ -45,7 +41,6 @@ unsigned int loadTexture(std:: string url)
     glBindTexture(GL_TEXTURE_2D,0);
 
     return textureID;
-
 }
 
 
@@ -92,7 +87,7 @@ int main()
     //Triangle
     float vertices[] = {
         // positions            //colors            // tex coords   // normals
-        0.5f, -0.5f, -0.5f,     1.0f, 1.0f, 1.0f,   1.f, 0.f,       0.f, -1.f, 0.f,
+        0.5f, -0.5f, -0.5f,     1.0f, 1.0f, 0.0f,   1.f, 0.f,       0.f, -1.f, 0.f,
         0.5f, -0.5f, 0.5f,      1.0f, 1.0f, 1.0f,   1.f, 1.f,       0.f, -1.f, 0.f,
         -0.5f, -0.5f, 0.5f,     1.0f, 1.0f, 1.0f,   0.f, 1.f,       0.f, -1.f, 0.f,
         -0.5f, -0.5f, -.5f,     1.0f, 1.0f, 1.0f,   0.f, 0.f,       0.f, -1.f, 0.f,
@@ -168,7 +163,8 @@ int main()
     //pos
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, stride , 0);
     glEnableVertexAttribArray(0);
-  //col
+   
+    //col
     glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, stride , (void*)(sizeof(float) * 3));
     glEnableVertexAttribArray(1);
    
