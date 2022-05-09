@@ -31,9 +31,6 @@
     </None>
   </ItemGroup>
   <ItemGroup>
-    <Image Include="..\..\..\..\..\..\Downloads\B_stone.tif">
-      <Filter>Source Files</Filter>
-    </Image>
     <Image Include="char.JPG">
       <Filter>Resource Files</Filter>
     </Image>

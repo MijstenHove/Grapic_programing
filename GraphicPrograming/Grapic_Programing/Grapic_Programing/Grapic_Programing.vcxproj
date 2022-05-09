@@ -150,7 +150,6 @@
     <None Include="VerShader.shader" />
   </ItemGroup>
   <ItemGroup>
-    <Image Include="..\..\..\..\..\..\Downloads\B_stone.tif" />
     <Image Include="char.JPG" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
