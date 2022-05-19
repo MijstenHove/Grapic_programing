@@ -8,6 +8,10 @@
 #define STB_IMAGE_IMPLEMENTATION
 #include "stb_image.h"
 
+#include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtc/type_ptr.hpp>
+
 void loadFromFile(const char* url, char** target) {
     std::ifstream stream(url, std::ios::binary);
     stream.seekg(0, stream.end);
@@ -45,12 +49,15 @@ unsigned int loadTexture(std::string url, GLenum format) {
 }
 int main()
 {
+    int width = 800;
+    int hight = 600;
+
     std::cout << "Hello World!\n";
     glfwInit();
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
-    GLFWwindow* window = glfwCreateWindow(800, 600, "Hello OpenGL!", nullptr,
+    GLFWwindow* window = glfwCreateWindow(width, hight, "Hello OpenGL!", nullptr,
         nullptr);
     glfwMakeContextCurrent(window);
     if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))
@@ -58,7 +65,9 @@ int main()
         std::cout << "Failed to initialize GLAD" << std::endl;
         return -1;
     }
-    glViewport(0, 0, 800, 600);
+  
+    
+    glViewport(0, 0, width, hight);
     ///SETUP OBJECT///
     // Vertices of our triangle!
     // need 24 vertices for normal/uv-mapped Cube
@@ -188,19 +197,42 @@ int main()
     glDeleteShader(fragID);
   
     ///END SETUP SHADER PROGRAM///
+
+    // matrix setup
+
+    //open gl setting 
+
+    glEnable(GL_CULL_FACE);
+    glCullFace(GL_BACK);
+
+    glUseProgram(myProgram);
+    int worldLoc = glGetUniformLocation(myProgram, "world");
+    int viewLoc = glGetUniformLocation(myProgram, "view");
+    int projnLoc = glGetUniformLocation(myProgram, "projection");
+
     while (!glfwWindowShouldClose(window)) {
         double t = glfwGetTime() * 1;
         float a = (float)sin(t * 0.0f);
         float r = (float)sin(t * 1.0f);
         float g = (float)cos(t * 0.0f);
         float b = (float)tan(t * 0.0f);
+
+
+        glm::mat4 world = glm::mat4(1.f);
+        world = glm::rotate(world, glm::radians((float)t * 45.0f), glm::vec3(0, 1, 1));
+        world = glm::scale(world, glm::vec3(1, 1, 1));
+        world = glm::translate(world, glm::vec3(0, 0, 0));
+
+        glm::mat4 view = glm::lookAt(glm::vec3(0, 3, -3), glm::vec3(0, 0, 0), glm::vec3(0, 1, 0));
+        glm::mat4 projection = glm::perspective(glm::radians(65.0f), width / (float)hight, 0.1f, 100.0f);
+
+
+        glUniformMatrix4fv(worldLoc, 1, GL_FALSE, glm::value_ptr(world));
+        glUniformMatrix4fv(viewLoc, 1, GL_FALSE, glm::value_ptr(view));
+        glUniformMatrix4fv(projnLoc, 1, GL_FALSE, glm::value_ptr(projection));
      
-        glUseProgram(myProgram);
-      
+     
         // iets tekenen
-        //glClearColor(r,g,b,1.0f);
-        //glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
-       // glClear(GL_COLOR_BUFFER_BIT);
         glClearColor(r, g, b, a);
         glfwSwapBuffers(window);
         glClear(GL_COLOR_BUFFER_BIT);
@@ -211,7 +243,6 @@ int main()
         glBindVertexArray(VAO);
         //glDrawArrays(GL_TRIANGLES, 0, 6);
         glDrawElements(GL_TRIANGLES, sizeof(indices), GL_UNSIGNED_INT, 0);
-        
        
         glfwPollEvents();
     }
