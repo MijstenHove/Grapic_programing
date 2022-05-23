@@ -13,9 +13,15 @@ out vec2 uv;
 out vec3 normal;
 out vec4 worldPixel;
 
+uniform sampler2D heightmap;
+
 void main(){
 
  vec4 worldPixel = world * vec4(vPos, 1.0f);
+
+ vec4 diffuserColor = texture(heightmap, vUV);
+ worldPixel.y += diffuseColor.r * 100;
+
  gl_Position = projection * view * world * vec4(vPos, 1.0f);
  color = vColor; 
  uv = vUV;

@@ -155,6 +155,9 @@
     <Image Include="char.JPG" />
     <Image Include="Heightmap2.png" />
   </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="utils.h" />
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>
