@@ -29,9 +29,18 @@
     <None Include="fragShader.shader">
       <Filter>Resource Files</Filter>
     </None>
+    <None Include="fragShaderSKY.shader">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="VerShaderSKY.shader">
+      <Filter>Resource Files</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <Image Include="char.JPG">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="Heightmap2.png">
       <Filter>Resource Files</Filter>
     </Image>
   </ItemGroup>

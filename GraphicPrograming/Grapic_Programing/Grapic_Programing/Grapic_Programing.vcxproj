@@ -147,10 +147,13 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="fragShader.shader" />
+    <None Include="fragShaderSKY.shader" />
     <None Include="VerShader.shader" />
+    <None Include="VerShaderSKY.shader" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="char.JPG" />
+    <Image Include="Heightmap2.png" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
