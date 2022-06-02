@@ -23,12 +23,12 @@ glm::vec3 cameraPosition(0, 5, 0), cameraForward(0, 0, 1), cameraUp(0, 1, 0);
 unsigned int plane, size, VAO, cubesize;
 unsigned int myProgram,skyProgram;
 
+//texture
 unsigned int heightmapID;
+unsigned int heightNormalID;
+unsigned int dirtID, sandID, grassID;
 
-unsigned int heightmapID, heightNormalID;
-unsigned int grassID, dirtID, sandID;
-
-
+ 
 void handleInput(GLFWwindow* window, float deltaTime) {
     static bool w, s, a, d, space, ctrl;
     static double cursorX = -1, cursorY = -1, lastCursorX, lastCursorY;
@@ -140,11 +140,11 @@ int main()
         glm::mat4 view = glm::lookAt(cameraPosition, cameraPosition + cameraForward, cameraUp);
         glm::mat4 projection = glm::perspective(glm::radians(65.0f), width / (float)height, 0.1f, 1000.0f);
 
-        // iets tekenen
+        // scherem clearen
         glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-
+        // render scene 
         renderskybox(view, projection);
         rendertarrain(view, projection);
 
@@ -159,7 +159,7 @@ int main()
 
 }
 
-    void rendertarrain(glm::mat4 view, glm::mat4 projection)
+void rendertarrain(glm::mat4 view, glm::mat4 projection)
     {
         // TERRAIN
         glUseProgram(myProgram);
@@ -181,7 +181,7 @@ int main()
      
     }
 
-    void renderskybox(glm::mat4 view, glm::mat4 projection)
+void renderskybox(glm::mat4 view, glm::mat4 projection)
     {
         // SKY BOX
         glUseProgram(skyProgram);
@@ -195,19 +195,19 @@ int main()
         glUniformMatrix4fv(glGetUniformLocation(skyProgram, "view"), 1, GL_FALSE, glm::value_ptr(view));
         glUniformMatrix4fv(glGetUniformLocation(skyProgram, "projection"), 1, GL_FALSE, glm::value_ptr(projection));
         glUniform3fv(glGetUniformLocation(skyProgram, "cameraPosition"), 1, glm::value_ptr(cameraPosition));
+        float t = glfwGetTime();
+        glUniform3f(glGetUniformLocation(skyProgram, "lightDirection"), glm::cos(t), -0.5f, glm::sin(t));
 
-        glActiveTexture(GL_TEXTURE);
-        glBindTexture(GL_TEXTURE_2D, heightmapID);
-        glActiveTexture(GL_TEXTURE);
-        glBindTexture(GL_TEXTURE_2D, heighnormaltmapID);
- 
+        //glActiveTexture(GL_TEXTURE0);
+        //glBindTexture(GL_TEXTURE_2D, diffuseTexID);
 
         glBindVertexArray(VAO);
-        glDrawElements(GL_TRIANGLES, sizeof(cubesize), GL_UNSIGNED_INT, 0);
-    
+        //glDrawArrays(GL_TRIANGLES, 0, 6);
+        glDrawElements(GL_TRIANGLES, cubesize, GL_UNSIGNED_INT, 0);
     }
 
-    void glsetup()
+
+void glsetup()
     {
         float vertices[] = {
             // positions            //colors            // tex coords   // normals
@@ -308,9 +308,10 @@ int main()
 
 
         //terrain
-        heightmapID = loadTexture("haightnormal.png", GL_RGBA, 4);
-
-        //dirtID = loadFromFile("dirt.jpg", gl_RGB, 1);
+        heightNormalID = loadTexture("NormalMap (1).png", GL_RGBA, 4);
+        dirtID = loadTexture("dirt.jpg", GL_RGB, 3);
+        sandID = loadTexture("sand.jpg", GL_RGB, 3);
+        grassID = loadTexture("grass.png", GL_RGBA, 4);
 
         ///SETUP SHADER PROGRAM///
         stbi_set_flip_vertically_on_load(true);
@@ -372,9 +373,14 @@ int main()
         glDeleteShader(vertSky);
         glDeleteShader(fragSky);
 
-        //
+      
         glUseProgram(myProgram);
         glUniform1i(glGetUniformLocation(myProgram, "heightmap"), 0);
         glUniform1i(glGetUniformLocation(myProgram, "normalmap"), 1);
+
+
+        glUniform1i(glGetUniformLocation(myProgram, "dirt"), 2);
+        glUniform1i(glGetUniformLocation(myProgram, "sand"), 3);
+        glUniform1i(glGetUniformLocation(myProgram, "grass"), 4);
     }
 

@@ -2,53 +2,58 @@
 
 out vec4 FragColor;
 
+in vec3 color;
+in vec2 uv;
+in vec3 normal;
 in vec4 worldPixel;
 
+uniform sampler2D heightmap;
+uniform sampler2D normalMap;
+
+uniform sampler2D dirt, sand, grass;
+
+uniform vec3 lightDirection;
 uniform vec3 cameraPosition;
 
-uniform sampler2D heightmap;
-uniform sampler2D normalmap;
-
-uniform sampler 2d dirt, sand, grass;
-
-uniform vec3 viewdir;
-
-vec3 lerp(vec3 a, vec3 b, float t) 
-{
-	return a + (B - a) * t;
+vec3 lerp(vec3 a, vec3 b, float t) {
+	return a + (b - a) * t;
 }
-
 
 void main() {
+	vec3 normalColor = texture(normalMap, uv).rbg * 2 - 1;
+	normalColor.b = -normalColor.b;
+	normalColor.r = -normalColor.r;
 
-	vec4 normalColor = texture(normalmap, uv).rbg *2 -1;
-	normalColor.b = -normalColor.b
-	normalColor.r = -normalColor.r 
+	vec3 lightDir = normalize(lightDirection);
+	float light = max(dot(-lightDir, normalColor), .25);
 
-	vec3 lightDir = normalize(vec3(0, -0.5, -1));
+	vec3 dirtColor = texture(dirt, uv).rgb;
+	vec3 sandColor = texture(sand, uv).rgb;
+	vec3 grassColor = texture(grass, uv).rgb;
 
-	float sun = max(dot(lightDir, normalcolor ), 0.0), 256);
+	float ds = clamp((worldPixel.y - 25) / 10, 0, 1);
+	float sg = clamp((worldPixel.y - 50) / 10, 0, 1);
 
-	vec3 dirtcolor = texter(dirt, uv).rgb;
-	vec3 sandcolor = texter(sand, uv).rgb;
-	vec3 grasscolor = texter(grass, uv).rgb;
+	vec3 diffuse = lerp(lerp(dirtColor, sandColor, ds), grassColor, sg);
 
-	float ds = clamp(worldpixel.y - 25) / 10, -1, 1);
-	float sg = clamp(worldpixel.y - 50) / 10, -1, 1);
+	float d = distance(worldPixel.xyz, cameraPosition);	// vec3(100, 100, 100));		// need uniform here again
+	float fogAmount = clamp((d - 50) / 250, 0, 1);		//
 
-
-	vec3 deffuse = lerp(lerp(dirtcolor, sandcolor, ds), grasscolor, sg);
-
-	FragColor = vec4(normalcolor,1.0);
-
-/*	vec3 lightDir = normalize(vec3(0, -0.5, -1));
-	vec3 viewDirection = normalize(worldPixel.xyz - cameraPosition);
-
-	vec3 top = vec3(5 / 255.0, 118 / 255.0, 189 / 255.0);
 	vec3 bot = vec3(188 / 255.0, 214 / 255.0, 231 / 255.0);
 
-	float sun = pow(max(dot(-viewDirection, lightDir), 0.0), 256);
+	FragColor = vec4(lerp(diffuse * light, bot, fogAmount), 1.0);
 
-	FragColor = vec4(lerp(bot, top, viewDirection.y) + sun * vec3(0.85, 0.55, 0.15), 1.0);*/
+	//FragColor = vec4(1, 1, 1, 1);
+
+	//vec3 camPos = vec3(0, 3, -3);
+	//vec3 viewDirection = normalize(worldPixel.xyz - camPos);
+
+	//vec3 lightReflect = normalize(reflect(-lightDir, normal));
+	//float specular = pow(max(dot(lightReflect, viewDirection), 0.0), 128);
+
+
+
+	//float light = max(dot(-lightDir, normal), .25);
+
+	// diffuseColor* light + specular * diffuseColor;// vec4(diffuseColor.rgb, 1.0f); //vec4(normal * .5 + .5, 0);// 
 }
-
