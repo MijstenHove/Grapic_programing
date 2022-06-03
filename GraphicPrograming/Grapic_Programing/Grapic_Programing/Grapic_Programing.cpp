@@ -10,11 +10,12 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
+#include "model.h"
 
 #define STB_IMAGE_IMPLEMENTATION
 #include "stb_image.h"
-
 #include "utils.h"
+
 
 // forward declarations
 void renderTerrain(glm::mat4 view, glm::mat4 projection);
@@ -373,4 +374,14 @@ void setupResources() {
     glUniform1i(glGetUniformLocation(myProgram, "dirt"), 2);
     glUniform1i(glGetUniformLocation(myProgram, "sand"), 3);
     glUniform1i(glGetUniformLocation(myProgram, "grass"), 4);
+}
+
+void renderModel(unsigned int shader, glm::vec3  pos)
+{
+   // glUniformMatrix4fv(glGetUniformLocation(shader, "world"), 1, GL_FALSE, glm::value_ptr(world));
+  //  glUniformMatrix4fv(glGetUniformLocation(shader, "view"), 1, GL_FALSE, glm::value_ptr(view));
+   // glUniformMatrix4fv(glGetUniformLocation(shader, "projection"), 1, GL_FALSE, glm::value_ptr(projection));
+    //glUniform3fv(glGetUniformLocation(shader, "cameraPosition"), 1, glm::value_ptr(cameraPosition));
+
+
 }

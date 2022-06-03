@@ -146,10 +146,12 @@
     <ClCompile Include="Grapic_Programing.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="fragModel.shader" />
     <None Include="fragShader.shader" />
     <None Include="fragShaderSKY.shader" />
     <None Include="VerShader.shader" />
     <None Include="VerShaderSKY.shader" />
+    <None Include="vertModel.shader" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="char.JPG" />
