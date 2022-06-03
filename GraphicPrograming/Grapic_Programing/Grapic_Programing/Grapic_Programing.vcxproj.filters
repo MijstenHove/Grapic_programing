@@ -43,7 +43,7 @@
     <Image Include="Heightmap2.png">
       <Filter>Resource Files</Filter>
     </Image>
-    <Image Include="NormalMap (1).png">
+    <Image Include="NormalMap.png">
       <Filter>Resource Files</Filter>
     </Image>
     <Image Include="sand.jpg">
@@ -53,6 +53,9 @@
       <Filter>Resource Files</Filter>
     </Image>
     <Image Include="grass.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="dirt.jpg">
       <Filter>Resource Files</Filter>
     </Image>
   </ItemGroup>

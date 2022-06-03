@@ -141,7 +141,7 @@ int main()
         glm::mat4 projection = glm::perspective(glm::radians(65.0f), width / (float)height, 0.1f, 1000.0f);
 
         // scherem clearen
-        glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+        glClearColor(1.0f, 0.0f, 0.0f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
         // render scene 
@@ -168,7 +168,7 @@ void rendertarrain(glm::mat4 view, glm::mat4 projection)
 
 
         glm::mat4 world = glm::mat4(1.f);
-        world = glm::translate(world, glm::vec3(0, 0, 0));
+        world = glm::translate(world, cameraPosition);
 
         glUniformMatrix4fv(glGetUniformLocation(myProgram, "world"), 1, GL_FALSE, glm::value_ptr(world));
         glUniformMatrix4fv(glGetUniformLocation(myProgram, "view"), 1, GL_FALSE, glm::value_ptr(view));
@@ -195,7 +195,9 @@ void renderskybox(glm::mat4 view, glm::mat4 projection)
         glUniformMatrix4fv(glGetUniformLocation(skyProgram, "view"), 1, GL_FALSE, glm::value_ptr(view));
         glUniformMatrix4fv(glGetUniformLocation(skyProgram, "projection"), 1, GL_FALSE, glm::value_ptr(projection));
         glUniform3fv(glGetUniformLocation(skyProgram, "cameraPosition"), 1, glm::value_ptr(cameraPosition));
+       
         float t = glfwGetTime();
+        t = t * 0.1f;
         glUniform3f(glGetUniformLocation(skyProgram, "lightDirection"), glm::cos(t), -0.5f, glm::sin(t));
 
         //glActiveTexture(GL_TEXTURE0);
@@ -308,7 +310,7 @@ void glsetup()
 
 
         //terrain
-        heightNormalID = loadTexture("NormalMap (1).png", GL_RGBA, 4);
+        heightNormalID = loadTexture("NormalMap.png", GL_RGBA, 4);
         dirtID = loadTexture("dirt.jpg", GL_RGB, 3);
         sandID = loadTexture("sand.jpg", GL_RGB, 3);
         grassID = loadTexture("grass.png", GL_RGBA, 4);
@@ -326,9 +328,8 @@ void glsetup()
         CreateShader("fragShaderSKY.shader", GL_FRAGMENT_SHADER, fragSky);
 
         // LOAD & CREATE TEXTURES
-
-        //unsigned int diffuseTexID = loadTexture("container2.png", GL_RGBA);
-        unsigned int diffuseTexID = loadTexture("char.JPG", GL_RGB,4);
+      
+       // unsigned int diffuseTexID = loadTexture("char.JPG", GL_RGB,4);
 
         // END
 
@@ -373,10 +374,10 @@ void glsetup()
         glDeleteShader(vertSky);
         glDeleteShader(fragSky);
 
-      
+      //end setup shader program
         glUseProgram(myProgram);
         glUniform1i(glGetUniformLocation(myProgram, "heightmap"), 0);
-        glUniform1i(glGetUniformLocation(myProgram, "normalmap"), 1);
+        glUniform1i(glGetUniformLocation(myProgram, "normalMap"), 1);
 
 
         glUniform1i(glGetUniformLocation(myProgram, "dirt"), 2);

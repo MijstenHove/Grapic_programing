@@ -6,13 +6,14 @@ layout(location = 2) in vec2 vUV;
 layout(location = 3) in vec3 vNormal;
 
 uniform mat4 world, view, projection;
+uniform sampler2D heightmap;
 
 out vec3 color;
 out vec2 uv;
 out vec3 normal;
 out vec4 worldPixel;
 
-uniform sampler2D heightmap;
+
 
 void main() {
 	//mat4 trs = world * view * projection;

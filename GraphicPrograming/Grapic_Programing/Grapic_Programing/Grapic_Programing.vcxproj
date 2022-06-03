@@ -153,9 +153,10 @@
   </ItemGroup>
   <ItemGroup>
     <Image Include="char.JPG" />
+    <Image Include="dirt.jpg" />
     <Image Include="grass.png" />
     <Image Include="Heightmap2.png" />
-    <Image Include="NormalMap (1).png" />
+    <Image Include="NormalMap.png" />
     <Image Include="sand.jpg" />
     <Image Include="snow.jpg" />
   </ItemGroup>

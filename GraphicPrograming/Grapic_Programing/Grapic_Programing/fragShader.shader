@@ -37,23 +37,9 @@ void main() {
 	vec3 diffuse = lerp(lerp(dirtColor, sandColor, ds), grassColor, sg);
 
 	float d = distance(worldPixel.xyz, cameraPosition);	// vec3(100, 100, 100));		// need uniform here again
-	float fogAmount = clamp((d - 50) / 250, 0, 1);		//
+	float fogAmount = clamp((d - 50) / 250, 0, 1);		
 
 	vec3 bot = vec3(188 / 255.0, 214 / 255.0, 231 / 255.0);
 
 	FragColor = vec4(lerp(diffuse * light, bot, fogAmount), 1.0);
-
-	//FragColor = vec4(1, 1, 1, 1);
-
-	//vec3 camPos = vec3(0, 3, -3);
-	//vec3 viewDirection = normalize(worldPixel.xyz - camPos);
-
-	//vec3 lightReflect = normalize(reflect(-lightDir, normal));
-	//float specular = pow(max(dot(lightReflect, viewDirection), 0.0), 128);
-
-
-
-	//float light = max(dot(-lightDir, normal), .25);
-
-	// diffuseColor* light + specular * diffuseColor;// vec4(diffuseColor.rgb, 1.0f); //vec4(normal * .5 + .5, 0);// 
 }
