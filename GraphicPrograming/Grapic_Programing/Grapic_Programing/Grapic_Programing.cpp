@@ -4,6 +4,7 @@
 #include <iostream>
 #include <glad/glad.h>
 #include "GLFW/glfw3.h"
+
 #include <fstream>
 
 #include <glm/glm.hpp>
@@ -12,23 +13,24 @@
 
 #define STB_IMAGE_IMPLEMENTATION
 #include "stb_image.h"
+
 #include "utils.h"
-//forwart decl
-void rendertarrain(glm::mat4 view, glm::mat4 projection);
-void renderskybox(glm::mat4 view, glm::mat4 projection);
-void glsetup();
 
-glm::vec3 cameraPosition(0, 5, 0), cameraForward(0, 0, 1), cameraUp(0, 1, 0); 
+// forward declarations
+void renderTerrain(glm::mat4 view, glm::mat4 projection);
+void renderSkybox(glm::mat4 view, glm::mat4 projection);
+void setupResources();
 
-unsigned int plane, size, VAO, cubesize;
-unsigned int myProgram,skyProgram;
+glm::vec3 cameraPosition(100, 100, 100), cameraForward(0, 0, 1), cameraUp(0, 1, 0);
 
-//texture
+unsigned int plane, planeSize, VAO, cubeSize;
+unsigned int myProgram, skyProgram;
+
+// textures
 unsigned int heightmapID;
 unsigned int heightNormalID;
 unsigned int dirtID, sandID, grassID;
 
- 
 void handleInput(GLFWwindow* window, float deltaTime) {
     static bool w, s, a, d, space, ctrl;
     static double cursorX = -1, cursorY = -1, lastCursorX, lastCursorY;
@@ -107,281 +109,268 @@ int main()
 
     glViewport(0, 0, width, height);
 
-    ///SETUP OBJECT///
-
-    glsetup();
-
-    ///END SETUP SHADER PROGRAM///
-
-    /// MATRIX SETUP ///
-    glUseProgram(myProgram);
-
-    int worldLoc = glGetUniformLocation(myProgram, "world");
-    int viewLoc = glGetUniformLocation(myProgram, "view");
-    int projLoc = glGetUniformLocation(myProgram, "projection");
-
-    /// END MATRIX SETUP ///
+    setupResources();
 
     // OPENGL SETTINGS //
-
     glEnable(GL_CULL_FACE);
-
+    glEnable(GL_DEPTH_TEST);
 
     while (!glfwWindowShouldClose(window)) {
         double t = glfwGetTime();
         float deltaTime = t - previousT;
         previousT = t;
-        float r = (float)sin(t * 1.1f);
-        float g = (float)sin(t * 1.3f);
-        float b = (float)sin(t * 1.7f);
 
         handleInput(window, deltaTime);
 
         glm::mat4 view = glm::lookAt(cameraPosition, cameraPosition + cameraForward, cameraUp);
         glm::mat4 projection = glm::perspective(glm::radians(65.0f), width / (float)height, 0.1f, 1000.0f);
 
-        // scherem clearen
-        glClearColor(1.0f, 0.0f, 0.0f, 1.0f);
+        // scherm clearen
+        glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-        // render scene 
-        renderskybox(view, projection);
-        rendertarrain(view, projection);
+        // render scene
+        renderSkybox(view, projection);
+        renderTerrain(view, projection);
 
         glfwSwapBuffers(window);
         glfwPollEvents();
     }
-    
-        glfwTerminate();
-        return 0;
-    
 
-
+    glfwTerminate();
+    return 0;
 }
 
-void rendertarrain(glm::mat4 view, glm::mat4 projection)
+void renderTerrain(glm::mat4 view, glm::mat4 projection) {
+    // TERRAIN
+    glUseProgram(myProgram);
+    glCullFace(GL_BACK);
+    glEnable(GL_DEPTH_TEST);
+
+    glm::mat4 world = glm::mat4(1.f);
+    world = glm::translate(world, glm::vec3(0, 0, 0));
+
+    glUniformMatrix4fv(glGetUniformLocation(myProgram, "world"), 1, GL_FALSE, glm::value_ptr(world));
+    glUniformMatrix4fv(glGetUniformLocation(myProgram, "view"), 1, GL_FALSE, glm::value_ptr(view));
+    glUniformMatrix4fv(glGetUniformLocation(myProgram, "projection"), 1, GL_FALSE, glm::value_ptr(projection));
+    glUniform3fv(glGetUniformLocation(myProgram, "cameraPosition"), 1, glm::value_ptr(cameraPosition));
+
+    float t = glfwGetTime();
+    glUniform3f(glGetUniformLocation(myProgram, "lightDirection"), glm::cos(t), -0.5f, glm::sin(t));
+
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_2D, heightmapID);
+    glActiveTexture(GL_TEXTURE1);
+    glBindTexture(GL_TEXTURE_2D, heightNormalID);
+
+    glActiveTexture(GL_TEXTURE2);
+    glBindTexture(GL_TEXTURE_2D, dirtID);
+    glActiveTexture(GL_TEXTURE3);
+    glBindTexture(GL_TEXTURE_2D, sandID);
+    glActiveTexture(GL_TEXTURE4);
+    glBindTexture(GL_TEXTURE_2D, grassID);
+
+    glBindVertexArray(plane);
+    glDrawElements(GL_TRIANGLES, planeSize, GL_UNSIGNED_INT, 0);
+}
+
+void renderSkybox(glm::mat4 view, glm::mat4 projection) {
+    // SKY BOX
+    glUseProgram(skyProgram);
+    glCullFace(GL_FRONT);
+    glDisable(GL_DEPTH_TEST);
+
+    glm::mat4 world = glm::mat4(1.f);
+    world = glm::translate(world, cameraPosition);
+
+    glUniformMatrix4fv(glGetUniformLocation(skyProgram, "world"), 1, GL_FALSE, glm::value_ptr(world));
+    glUniformMatrix4fv(glGetUniformLocation(skyProgram, "view"), 1, GL_FALSE, glm::value_ptr(view));
+    glUniformMatrix4fv(glGetUniformLocation(skyProgram, "projection"), 1, GL_FALSE, glm::value_ptr(projection));
+    glUniform3fv(glGetUniformLocation(skyProgram, "cameraPosition"), 1, glm::value_ptr(cameraPosition));
+
+    float t = glfwGetTime();
+    glUniform3f(glGetUniformLocation(skyProgram, "lightDirection"), glm::cos(t), -0.5f, glm::sin(t));
+
+    //glActiveTexture(GL_TEXTURE0);
+    //glBindTexture(GL_TEXTURE_2D, diffuseTexID);
+
+    glBindVertexArray(VAO);
+    //glDrawArrays(GL_TRIANGLES, 0, 6);
+    glDrawElements(GL_TRIANGLES, cubeSize, GL_UNSIGNED_INT, 0);
+}
+
+void setupResources() {
+    ///SETUP OBJECT///
+
+// Vertices of our triangle!
+// need 24 vertices for normal/uv-mapped Cube
+    float vertices[] = {
+        // positions            //colors            // tex coords   // normals
+        0.5f, -0.5f, -0.5f,     1.0f, 0.0f, 1.0f,   1.f, 0.f,       0.f, -1.f, 0.f,
+        0.5f, -0.5f, 0.5f,      1.0f, 1.0f, 0.0f,   1.f, 1.f,       0.f, -1.f, 0.f,
+        -0.5f, -0.5f, 0.5f,     0.0f, 1.0f, 1.0f,   0.f, 1.f,       0.f, -1.f, 0.f,
+        -0.5f, -0.5f, -.5f,     1.0f, 1.0f, 1.0f,   0.f, 0.f,       0.f, -1.f, 0.f,
+
+        0.5f, 0.5f, -0.5f,      1.0f, 1.0f, 1.0f,   2.f, 0.f,       1.f, 0.f, 0.f,
+        0.5f, 0.5f, 0.5f,       1.0f, 1.0f, 1.0f,   2.f, 1.f,       1.f, 0.f, 0.f,
+
+        0.5f, 0.5f, 0.5f,       1.0f, 1.0f, 1.0f,   1.f, 2.f,       0.f, 0.f, 1.f,
+        -0.5f, 0.5f, 0.5f,      1.0f, 1.0f, 1.0f,   0.f, 2.f,       0.f, 0.f, 1.f,
+
+        -0.5f, 0.5f, 0.5f,      1.0f, 1.0f, 1.0f,   -1.f, 1.f,      -1.f, 0.f, 0.f,
+        -0.5f, 0.5f, -.5f,      1.0f, 1.0f, 1.0f,   -1.f, 0.f,      -1.f, 0.f, 0.f,
+
+        -0.5f, 0.5f, -.5f,      1.0f, 1.0f, 1.0f,   0.f, -1.f,      0.f, 0.f, -1.f,
+        0.5f, 0.5f, -0.5f,      1.0f, 1.0f, 1.0f,   1.f, -1.f,      0.f, 0.f, -1.f,
+
+        -0.5f, 0.5f, -.5f,      1.0f, 1.0f, 1.0f,   3.f, 0.f,       0.f, 1.f, 0.f,
+        -0.5f, 0.5f, 0.5f,      1.0f, 1.0f, 1.0f,   3.f, 1.f,       0.f, 1.f, 0.f,
+
+        0.5f, -0.5f, 0.5f,      1.0f, 1.0f, 1.0f,   1.f, 1.f,       0.f, 0.f, 1.f,
+        -0.5f, -0.5f, 0.5f,     1.0f, 1.0f, 1.0f,   0.f, 1.f,       0.f, 0.f, 1.f,
+
+        -0.5f, -0.5f, 0.5f,     1.0f, 1.0f, 1.0f,   0.f, 1.f,       -1.f, 0.f, 0.f,
+        -0.5f, -0.5f, -.5f,     1.0f, 1.0f, 1.0f,   0.f, 0.f,       -1.f, 0.f, 0.f,
+
+        -0.5f, -0.5f, -.5f,     1.0f, 1.0f, 1.0f,   0.f, 0.f,       0.f, 0.f, -1.f,
+        0.5f, -0.5f, -0.5f,     1.0f, 1.0f, 1.0f,   1.f, 0.f,       0.f, 0.f, -1.f,
+
+        0.5f, -0.5f, -0.5f,     1.0f, 1.0f, 1.0f,   1.f, 0.f,       1.f, 0.f, 0.f,
+        0.5f, -0.5f, 0.5f,      1.0f, 1.0f, 1.0f,   1.f, 1.f,       1.f, 0.f, 0.f,
+
+        0.5f, 0.5f, -0.5f,      1.0f, 1.0f, 1.0f,   2.f, 0.f,       0.f, 1.f, 0.f,
+        0.5f, 0.5f, 0.5f,       1.0f, 1.0f, 1.0f,   2.f, 1.f,       0.f, 1.f, 0.f
+    };
+
+    unsigned int indices[] = {  // note that we start from 0!
+        // DOWN
+        0, 1, 2,   // first triangle
+        0, 2, 3,    // second triangle
+        // BACK
+        14, 6, 7,   // first triangle
+        14, 7, 15,    // second triangle
+        // RIGHT
+        20, 4, 5,   // first triangle
+        20, 5, 21,    // second triangle
+        // LEFT
+        16, 8, 9,   // first triangle
+        16, 9, 17,    // second triangle
+        // FRONT
+        18, 10, 11,   // first triangle
+        18, 11, 19,    // second triangle
+        // UP
+        22, 12, 13,   // first triangle
+        22, 13, 23,    // second triangle
+    };
+
+    cubeSize = sizeof(indices);
+
+    glGenVertexArrays(1, &VAO);
+    unsigned int VBO;
+    glGenBuffers(1, &VBO);
+    unsigned int EBO;
+    glGenBuffers(1, &EBO);
+
+    glBindVertexArray(VAO);
+
+    glBindBuffer(GL_ARRAY_BUFFER, VBO);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
+
+    int stride = sizeof(float) * 11;
+
+    // position
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, stride, 0);
+    glEnableVertexAttribArray(0);
+    // color
+    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, stride, (void*)(sizeof(float) * 3));
+    glEnableVertexAttribArray(1);
+    // uv
+    glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, stride, (void*)(sizeof(float) * 6));
+    glEnableVertexAttribArray(2);
+    // normal
+    glVertexAttribPointer(3, 3, GL_FLOAT, GL_FALSE, stride, (void*)(sizeof(float) * 8));
+    glEnableVertexAttribArray(3);
+
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
+    glBindVertexArray(0);
+    ///END SETUP OBJECT///
+
+    plane = GeneratePlane("Heightmap.png", GL_RGBA, 4, 1.0f, 1.0f, planeSize, heightmapID);
+
+    // terrain textures
+    heightNormalID = loadTexture("heightnormal.png", GL_RGBA, 4);
+    dirtID = loadTexture("dirt.jpg", GL_RGB, 3);
+    sandID = loadTexture("sand.jpg", GL_RGB, 3);
+    grassID = loadTexture("grass.png", GL_RGBA, 4);
+
+    ///SETUP SHADER PROGRAM///
+    stbi_set_flip_vertically_on_load(true);
+
+    char* vertexSource;
+    loadFromFile("VerShader.shader", &vertexSource);
+    char* fragmentSource;
+    loadFromFile("fragShader.shader", &fragmentSource);
+
+    unsigned int vertSky, fragSky;
+    CreateShader("VerShaderSky.shader", GL_VERTEX_SHADER, vertSky);
+    CreateShader("fragShaderSky.shader", GL_FRAGMENT_SHADER, fragSky);
+
+    // LOAD & CREATE TEXTURES
+
+    //unsigned int diffuseTexID = loadTexture("container2.png", GL_RGBA);
+    unsigned int diffuseTexID = loadTexture("randomImage.jpg", GL_RGB, 3);
+
+    // END
+
+    unsigned int vertID, fragID;
+    vertID = glCreateShader(GL_VERTEX_SHADER);
+    fragID = glCreateShader(GL_FRAGMENT_SHADER);
+
+    glShaderSource(vertID, 1, &vertexSource, nullptr);
+    glShaderSource(fragID, 1, &fragmentSource, nullptr);
+
+    int success;
+    char infoLog[512];
+
+    glCompileShader(vertID);
+    glGetShaderiv(vertID, GL_COMPILE_STATUS, &success);
+    if (!success)
     {
-        // TERRAIN
-        glUseProgram(myProgram);
-        glCullFace(GL_BACK);
-        glEnable(GL_DEPTH_TEST);
+        glGetShaderInfoLog(vertID, 512, NULL, infoLog);
+        std::cout << "ERROR::SHADER::VERTEX::COMPILATION_FAILED\n" << infoLog << std::endl;
+    };
 
-
-        glm::mat4 world = glm::mat4(1.f);
-        world = glm::translate(world, cameraPosition);
-
-        glUniformMatrix4fv(glGetUniformLocation(myProgram, "world"), 1, GL_FALSE, glm::value_ptr(world));
-        glUniformMatrix4fv(glGetUniformLocation(myProgram, "view"), 1, GL_FALSE, glm::value_ptr(view));
-        glUniformMatrix4fv(glGetUniformLocation(myProgram, "projection"), 1, GL_FALSE, glm::value_ptr(projection));
-        glUniform3fv(glGetUniformLocation(myProgram, "cameraPosition"), 1, glm::value_ptr(cameraPosition));
-
-        glBindVertexArray(plane);
-        glDrawElements(GL_LINES, size, GL_UNSIGNED_INT, 0);
-
-     
-    }
-
-void renderskybox(glm::mat4 view, glm::mat4 projection)
+    glCompileShader(fragID);
+    glGetShaderiv(fragID, GL_COMPILE_STATUS, &success);
+    if (!success)
     {
-        // SKY BOX
-        glUseProgram(skyProgram);
-        glCullFace(GL_FRONT);
-        glDisable(GL_DEPTH_TEST);
+        glGetShaderInfoLog(fragID, 512, NULL, infoLog);
+        std::cout << "ERROR::SHADER::VERTEX::COMPILATION_FAILED\n" << infoLog << std::endl;
+    };
 
-        glm::mat4 world = glm::mat4(1.f);
-        world = glm::translate(world, cameraPosition);
+    myProgram = glCreateProgram();
+    glAttachShader(myProgram, vertID);
+    glAttachShader(myProgram, fragID);
+    glLinkProgram(myProgram);
 
-        glUniformMatrix4fv(glGetUniformLocation(skyProgram, "world"), 1, GL_FALSE, glm::value_ptr(world));
-        glUniformMatrix4fv(glGetUniformLocation(skyProgram, "view"), 1, GL_FALSE, glm::value_ptr(view));
-        glUniformMatrix4fv(glGetUniformLocation(skyProgram, "projection"), 1, GL_FALSE, glm::value_ptr(projection));
-        glUniform3fv(glGetUniformLocation(skyProgram, "cameraPosition"), 1, glm::value_ptr(cameraPosition));
-       
-        float t = glfwGetTime();
-        t = t * 0.1f;
-        glUniform3f(glGetUniformLocation(skyProgram, "lightDirection"), glm::cos(t), -0.5f, glm::sin(t));
+    skyProgram = glCreateProgram();
+    glAttachShader(skyProgram, vertSky);
+    glAttachShader(skyProgram, fragSky);
+    glLinkProgram(skyProgram);
 
-        //glActiveTexture(GL_TEXTURE0);
-        //glBindTexture(GL_TEXTURE_2D, diffuseTexID);
+    glDeleteShader(vertID);
+    glDeleteShader(fragID);
+    glDeleteShader(vertSky);
+    glDeleteShader(fragSky);
 
-        glBindVertexArray(VAO);
-        //glDrawArrays(GL_TRIANGLES, 0, 6);
-        glDrawElements(GL_TRIANGLES, cubesize, GL_UNSIGNED_INT, 0);
-    }
+    ///END SETUP SHADER PROGRAM///
+    glUseProgram(myProgram);
+    glUniform1i(glGetUniformLocation(myProgram, "heightmap"), 0);
+    glUniform1i(glGetUniformLocation(myProgram, "normalMap"), 1);
 
-
-void glsetup()
-    {
-        float vertices[] = {
-            // positions            //colors            // tex coords   // normals
-            0.5f, -0.5f, -0.5f,     1.0f, 0.0f, 1.0f,   1.f, 0.f,       0.f, -1.f, 0.f,
-            0.5f, -0.5f, 0.5f,      1.0f, 1.0f, 0.0f,   1.f, 1.f,       0.f, -1.f, 0.f,
-            -0.5f, -0.5f, 0.5f,     0.0f, 1.0f, 1.0f,   0.f, 1.f,       0.f, -1.f, 0.f,
-            -0.5f, -0.5f, -.5f,     1.0f, 1.0f, 1.0f,   0.f, 0.f,       0.f, -1.f, 0.f,
-
-            0.5f, 0.5f, -0.5f,      1.0f, 1.0f, 1.0f,   2.f, 0.f,       1.f, 0.f, 0.f,
-            0.5f, 0.5f, 0.5f,       1.0f, 1.0f, 1.0f,   2.f, 1.f,       1.f, 0.f, 0.f,
-
-            0.5f, 0.5f, 0.5f,       1.0f, 1.0f, 1.0f,   1.f, 2.f,       0.f, 0.f, 1.f,
-            -0.5f, 0.5f, 0.5f,      1.0f, 1.0f, 1.0f,   0.f, 2.f,       0.f, 0.f, 1.f,
-
-            -0.5f, 0.5f, 0.5f,      1.0f, 1.0f, 1.0f,   -1.f, 1.f,      -1.f, 0.f, 0.f,
-            -0.5f, 0.5f, -.5f,      1.0f, 1.0f, 1.0f,   -1.f, 0.f,      -1.f, 0.f, 0.f,
-
-            -0.5f, 0.5f, -.5f,      1.0f, 1.0f, 1.0f,   0.f, -1.f,      0.f, 0.f, -1.f,
-            0.5f, 0.5f, -0.5f,      1.0f, 1.0f, 1.0f,   1.f, -1.f,      0.f, 0.f, -1.f,
-
-            -0.5f, 0.5f, -.5f,      1.0f, 1.0f, 1.0f,   3.f, 0.f,       0.f, 1.f, 0.f,
-            -0.5f, 0.5f, 0.5f,      1.0f, 1.0f, 1.0f,   3.f, 1.f,       0.f, 1.f, 0.f,
-
-            0.5f, -0.5f, 0.5f,      1.0f, 1.0f, 1.0f,   1.f, 1.f,       0.f, 0.f, 1.f,
-            -0.5f, -0.5f, 0.5f,     1.0f, 1.0f, 1.0f,   0.f, 1.f,       0.f, 0.f, 1.f,
-
-            -0.5f, -0.5f, 0.5f,     1.0f, 1.0f, 1.0f,   0.f, 1.f,       -1.f, 0.f, 0.f,
-            -0.5f, -0.5f, -.5f,     1.0f, 1.0f, 1.0f,   0.f, 0.f,       -1.f, 0.f, 0.f,
-
-            -0.5f, -0.5f, -.5f,     1.0f, 1.0f, 1.0f,   0.f, 0.f,       0.f, 0.f, -1.f,
-            0.5f, -0.5f, -0.5f,     1.0f, 1.0f, 1.0f,   1.f, 0.f,       0.f, 0.f, -1.f,
-
-            0.5f, -0.5f, -0.5f,     1.0f, 1.0f, 1.0f,   1.f, 0.f,       1.f, 0.f, 0.f,
-            0.5f, -0.5f, 0.5f,      1.0f, 1.0f, 1.0f,   1.f, 1.f,       1.f, 0.f, 0.f,
-
-            0.5f, 0.5f, -0.5f,      1.0f, 1.0f, 1.0f,   2.f, 0.f,       0.f, 1.f, 0.f,
-            0.5f, 0.5f, 0.5f,       1.0f, 1.0f, 1.0f,   2.f, 1.f,       0.f, 1.f, 0.f
-        };
-
-        unsigned int indices[] = {  // note that we start from 0!
-            // DOWN
-            0, 1, 2,   // first triangle
-            0, 2, 3,    // second triangle
-            // BACK
-            14, 6, 7,   // first triangle
-            14, 7, 15,    // second triangle
-            // RIGHT
-            20, 4, 5,   // first triangle
-            20, 5, 21,    // second triangle
-            // LEFT
-            16, 8, 9,   // first triangle
-            16, 9, 17,    // second triangle
-            // FRONT
-            18, 10, 11,   // first triangle
-            18, 11, 19,    // second triangle
-            // UP
-            22, 12, 13,   // first triangle
-            22, 13, 23,    // second triangle
-        };
-
-        cubesize = sizeof(indices);
-
-        unsigned int VAO;
-        glGenVertexArrays(1, &VAO);
-        unsigned int VBO;
-        glGenBuffers(1, &VBO);
-        unsigned int EBO;
-        glGenBuffers(1, &EBO);
-
-        glBindVertexArray(VAO);
-
-        glBindBuffer(GL_ARRAY_BUFFER, VBO);
-        glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
-        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
-        glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
-
-        int stride = sizeof(float) * 11;
-
-        // position
-        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, stride, 0);
-        glEnableVertexAttribArray(0);
-        // color
-        glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, stride, (void*)(sizeof(float) * 3));
-        glEnableVertexAttribArray(1);
-        // uv
-        glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, stride, (void*)(sizeof(float) * 6));
-        glEnableVertexAttribArray(2);
-        // normal
-        glVertexAttribPointer(3, 3, GL_FLOAT, GL_FALSE, stride, (void*)(sizeof(float) * 8));
-        glEnableVertexAttribArray(3);
-
-        glBindBuffer(GL_ARRAY_BUFFER, 0);
-        glBindVertexArray(0);
-        ///END SETUP OBJECT///
-
-
-        plane = GeneratePlane("Heightmap2.png", GL_RGBA, 4, 1.0f, 1.0f, size, heightmapID);
-
-
-        //terrain
-        heightNormalID = loadTexture("NormalMap.png", GL_RGBA, 4);
-        dirtID = loadTexture("dirt.jpg", GL_RGB, 3);
-        sandID = loadTexture("sand.jpg", GL_RGB, 3);
-        grassID = loadTexture("grass.png", GL_RGBA, 4);
-
-        ///SETUP SHADER PROGRAM///
-        stbi_set_flip_vertically_on_load(true);
-
-        char* vertexSource;
-        loadFromFile("VerShader.shader", &vertexSource);
-        char* fragmentSource;
-        loadFromFile("fragShader.shader", &fragmentSource);
-
-        unsigned int vertSky, fragSky;
-        CreateShader("VerShaderSKY.shader", GL_VERTEX_SHADER, vertSky);
-        CreateShader("fragShaderSKY.shader", GL_FRAGMENT_SHADER, fragSky);
-
-        // LOAD & CREATE TEXTURES
-      
-       // unsigned int diffuseTexID = loadTexture("char.JPG", GL_RGB,4);
-
-        // END
-
-        unsigned int vertID, fragID;
-        vertID = glCreateShader(GL_VERTEX_SHADER);
-        fragID = glCreateShader(GL_FRAGMENT_SHADER);
-
-        glShaderSource(vertID, 1, &vertexSource, nullptr);
-        glShaderSource(fragID, 1, &fragmentSource, nullptr);
-
-        int success;
-        char infoLog[512];
-
-        glCompileShader(vertID);
-        glGetShaderiv(vertID, GL_COMPILE_STATUS, &success);
-        if (!success)
-        {
-            glGetShaderInfoLog(vertID, 512, NULL, infoLog);
-            std::cout << "ERROR::SHADER::VERTEX::COMPILATION_FAILED\n" << infoLog << std::endl;
-        };
-
-        glCompileShader(fragID);
-        glGetShaderiv(fragID, GL_COMPILE_STATUS, &success);
-        if (!success)
-        {
-            glGetShaderInfoLog(fragID, 512, NULL, infoLog);
-            std::cout << "ERROR::SHADER::VERTEX::COMPILATION_FAILED\n" << infoLog << std::endl;
-        };
-
-        unsigned int myProgram = glCreateProgram();
-        glAttachShader(myProgram, vertID);
-        glAttachShader(myProgram, fragID);
-        glLinkProgram(myProgram);
-
-        unsigned int skyProgram = glCreateProgram();
-        glAttachShader(skyProgram, vertSky);
-        glAttachShader(skyProgram, fragSky);
-        glLinkProgram(skyProgram);
-
-        glDeleteShader(vertID);
-        glDeleteShader(fragID);
-        glDeleteShader(vertSky);
-        glDeleteShader(fragSky);
-
-      //end setup shader program
-        glUseProgram(myProgram);
-        glUniform1i(glGetUniformLocation(myProgram, "heightmap"), 0);
-        glUniform1i(glGetUniformLocation(myProgram, "normalMap"), 1);
-
-
-        glUniform1i(glGetUniformLocation(myProgram, "dirt"), 2);
-        glUniform1i(glGetUniformLocation(myProgram, "sand"), 3);
-        glUniform1i(glGetUniformLocation(myProgram, "grass"), 4);
-    }
-
+    glUniform1i(glGetUniformLocation(myProgram, "dirt"), 2);
+    glUniform1i(glGetUniformLocation(myProgram, "sand"), 3);
+    glUniform1i(glGetUniformLocation(myProgram, "grass"), 4);
+}

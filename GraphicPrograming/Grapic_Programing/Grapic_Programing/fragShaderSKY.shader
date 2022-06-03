@@ -20,6 +20,6 @@ void main() {
 
 	float sun = pow(max(dot(-viewDirection, lightDir), 0.0), 256);
 
-	FragColor = vec4(1, 0, 0,1);
-	//FragColor = vec4(lerp(bot, top, viewDirection.y) + sun, 1.0);
+	//FragColor = vec4(1, 0, 0,1);
+	FragColor = vec4(lerp(bot, top, viewDirection.y) + sun, 1.0);
 }

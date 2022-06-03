@@ -1,6 +1,6 @@
 ﻿  Grapic_Programing.cpp
 C:\Users\mijst\Documents\Git\Grapic_programing\GraphicPrograming\Grapic_Programing\Grapic_Programing\utils.h(5,15): warning C4244: 'initializing': conversion from 'std::streamoff' to 'int', possible loss of data
-C:\Users\mijst\Documents\Git\Grapic_programing\GraphicPrograming\Grapic_Programing\Grapic_Programing\Grapic_Programing.cpp(132,25): warning C4244: 'initializing': conversion from 'double' to 'float', possible loss of data
-C:\Users\mijst\Documents\Git\Grapic_programing\GraphicPrograming\Grapic_Programing\Grapic_Programing\Grapic_Programing.cpp(199,17): warning C4244: 'initializing': conversion from 'double' to 'float', possible loss of data
-LINK : warning LNK4098: defaultlib 'MSVCRT' conflicts with use of other libs; use /NODEFAULTLIB:library
+C:\Users\mijst\Documents\Git\Grapic_programing\GraphicPrograming\Grapic_Programing\Grapic_Programing\Grapic_Programing.cpp(120,25): warning C4244: 'initializing': conversion from 'double' to 'float', possible loss of data
+C:\Users\mijst\Documents\Git\Grapic_programing\GraphicPrograming\Grapic_Programing\Grapic_Programing\Grapic_Programing.cpp(158,13): warning C4244: 'initializing': conversion from 'double' to 'float', possible loss of data
+C:\Users\mijst\Documents\Git\Grapic_programing\GraphicPrograming\Grapic_Programing\Grapic_Programing\Grapic_Programing.cpp(191,13): warning C4244: 'initializing': conversion from 'double' to 'float', possible loss of data
   Grapic_Programing.vcxproj -> C:\Users\mijst\Documents\Git\Grapic_programing\GraphicPrograming\Grapic_Programing\x64\Debug\Grapic_Programing.exe

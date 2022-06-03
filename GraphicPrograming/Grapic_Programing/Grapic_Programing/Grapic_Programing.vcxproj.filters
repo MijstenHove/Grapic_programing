@@ -40,10 +40,10 @@
     <Image Include="char.JPG">
       <Filter>Resource Files</Filter>
     </Image>
-    <Image Include="Heightmap2.png">
+    <Image Include="Heightmap.png">
       <Filter>Resource Files</Filter>
     </Image>
-    <Image Include="NormalMap.png">
+    <Image Include="heightnormal.png">
       <Filter>Resource Files</Filter>
     </Image>
     <Image Include="sand.jpg">
@@ -62,6 +62,12 @@
   <ItemGroup>
     <ClInclude Include="utils.h">
       <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="mesh.h">
+      <Filter>Resource Files</Filter>
+    </ClInclude>
+    <ClInclude Include="model.h">
+      <Filter>Resource Files</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
